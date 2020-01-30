@@ -1,0 +1,33 @@
+{
+    "service": {
+        "name": "food",
+        "id": "food-v1",
+        "address": "10.5.0.3",
+        "port": 1324,
+        "connect": { 
+            "sidecar_service": {
+                "proxy": {
+                    "upstreams": [
+                        {
+                            "destination_name": "price",
+                            "local_bind_address": "127.0.0.1",
+                            "local_bind_port": 9090
+                        },
+                        {
+                            "destination_name": "desc",
+                            "local_bind_address": "127.0.0.1",
+                            "local_bind_port": 9091
+                        }
+                    ]
+                },
+                "check": {
+                    "name": "Connect Proxy Sidecar",
+                    "http": "http://10.5.0.3:1324/food/healthz",
+                    "tls_skip_verify": true,
+                    "method": "GET",
+                    "interval": "30s"
+                }
+            } 
+        }
+    }
+}

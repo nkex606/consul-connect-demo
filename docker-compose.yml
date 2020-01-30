@@ -1,0 +1,85 @@
+version: '3'
+services: 
+
+    consul-server1:
+        build: 
+            context: .
+            dockerfile: Dockerfile-consulconnect
+        ports: 
+            - 8501:8500
+        command: "agent -server -node=server1 -ui -bootstrap-expect=1 -client=0.0.0.0"
+        volumes:
+            - "./consul_config:/consul/config"
+        networks:
+            vpcbr:
+                ipv4_address: 10.5.0.2
+
+    food:
+        image: john19/food
+        ports:
+            - 1324:1324
+        environment: 
+            PRICE_URL: http://localhost:9090
+            DESC_URL: http://localhost:9091
+        networks:
+            vpcbr:
+                ipv4_address: 10.5.0.3
+    food_proxy:
+        image: nicholasjackson/consul-envoy:v1.6.1-v0.10.0
+        environment:
+            CONSUL_HTTP_ADDR: 10.5.0.2:8500
+            CONSUL_GRPC_ADDR: 10.5.0.2:8502
+            SERVICE_CONFIG: /config/food.json
+        volumes:
+            - "./service_config:/config"
+        command: "consul connect envoy -sidecar-for food-v1"
+        network_mode: "service:food"
+        depends_on: 
+            - "consul-server1"
+
+    price:
+        image: john19/price
+        environment:
+            LISTEN_HOST: 0.0.0.0:1324
+        networks:
+            vpcbr:
+                ipv4_address: 10.5.0.4
+    price_proxy:
+        image: nicholasjackson/consul-envoy:v1.6.1-v0.10.0
+        environment:
+            CONSUL_HTTP_ADDR: 10.5.0.2:8500
+            CONSUL_GRPC_ADDR: 10.5.0.2:8502
+            SERVICE_CONFIG: /config/price.json
+        volumes:
+            - "./service_config:/config"
+        command: "consul connect envoy -sidecar-for price-v1"
+        network_mode: "service:price"
+        depends_on: 
+            - "consul-server1"
+
+    desc:
+        image: john19/desc
+        environment:
+            LISTEN_HOST: 0.0.0.0:1324
+        networks:
+            vpcbr:
+                ipv4_address: 10.5.0.5
+    desc_proxy:
+        image: nicholasjackson/consul-envoy:v1.6.1-v0.10.0
+        environment:
+            CONSUL_HTTP_ADDR: 10.5.0.2:8500
+            CONSUL_GRPC_ADDR: 10.5.0.2:8502
+            SERVICE_CONFIG: /config/desc.json
+        volumes:
+            - "./service_config:/config"
+        command: "consul connect envoy -sidecar-for desc-v1"
+        network_mode: "service:desc"
+        depends_on: 
+            - "consul-server1"
+
+networks: 
+    vpcbr:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: "10.5.0.0/16"

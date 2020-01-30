@@ -1,0 +1,4 @@
+FROM consul
+RUN apk add vim && export ll="ls -la"
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+CMD ["agent", "-dev", "-client", "0.0.0.0"]

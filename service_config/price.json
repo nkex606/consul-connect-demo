@@ -1,0 +1,19 @@
+{
+    "service": {
+        "name": "price",
+        "id": "price-v1",
+        "address": "10.5.0.4",
+        "port": 1324,
+        "connect": { 
+            "sidecar_service": {
+                "check": {
+                    "name": "Connect Proxy Sidecar",
+                    "http": "http://10.5.0.4:1324/price/healthz",
+                    "tls_skip_verify": true,
+                    "method": "GET",
+                    "interval": "30s"
+                }
+            } 
+        }
+    }
+}
