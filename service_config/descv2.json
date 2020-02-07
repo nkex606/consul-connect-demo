@@ -1,17 +1,17 @@
 {
     "service": {
         "name": "desc",
-        "id": "desc-v1",
-        "address": "10.5.0.5",
+        "id": "desc-v2",
+        "address": "10.5.0.6",
         "port": 1324,
         "meta": {
-            "version": "v1"
+            "version": "v2"
         },
         "connect": { 
             "sidecar_service": {
                 "check": {
                     "name": "Connect Proxy Sidecar",
-                    "http": "http://10.5.0.5:1324/desc/healthz",
+                    "http": "http://10.5.0.6:1324/desc/healthz",
                     "tls_skip_verify": true,
                     "method": "GET",
                     "interval": "30s"

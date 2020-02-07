@@ -77,6 +77,26 @@ services:
         depends_on: 
             - "consul-server1"
 
+    descv2:
+        image: john19/descv2
+        environment:
+            LISTEN_HOST: 0.0.0.0:1324
+        networks:
+            vpcbr:
+                ipv4_address: 10.5.0.6
+    descv2_proxy:
+        image: nicholasjackson/consul-envoy:v1.6.1-v0.10.0
+        environment:
+            CONSUL_HTTP_ADDR: 10.5.0.2:8500
+            CONSUL_GRPC_ADDR: 10.5.0.2:8502
+            SERVICE_CONFIG: /config/descv2.json
+        volumes:
+            - "./service_config:/config"
+        command: "consul connect envoy -sidecar-for desc-v2"
+        network_mode: "service:descv2"
+        depends_on: 
+            - "consul-server1"
+
 networks: 
     vpcbr:
         driver: bridge
